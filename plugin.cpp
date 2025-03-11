@@ -3,17 +3,17 @@
 #include <plugify/string.hpp>
 #include <plugin_export.h>
 
-class ExamplePlugin : public plg::IPluginEntry {
+class ExamplePlugin final : public plg::IPluginEntry {
 public:
-	void OnPluginStart() override {
+	void OnPluginStart() final {
 		std::cout << "Example Start!" << std::endl;
 	}
 
-	void OnPluginUpdate(float dt) override {
+	void OnPluginUpdate(float dt) final {
 		std::cout << "Example Update!" << std::endl;
 	}
 
-	void OnPluginEnd() override {
+	void OnPluginEnd() final {
 		std::cout << "Example End!" << std::endl;
 	}
 
@@ -24,7 +24,7 @@ public:
 	}
 } g_examplePlugin;
 
-EXPOSE_PLUGIN(PLUGIN_API, &g_examplePlugin)
+EXPOSE_PLUGIN(PLUGIN_API, ExamplePlugin, &g_examplePlugin)
 
 extern "C"
 PLUGIN_API void MakePrint(int count, const plg::string& message) {
