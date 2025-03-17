@@ -10,7 +10,7 @@ public:
 	}
 
 	void OnPluginUpdate(float dt) final {
-		std::cout << "Example Update!" << std::endl;
+		std::cout << "Example Update!" << dt << std::endl;
 	}
 
 	void OnPluginEnd() final {

@@ -43,6 +43,9 @@ namespace plg {
 		using GetAuthorFn = std::string_view (*)(void*);
 		using GetWebsiteFn = std::string_view (*)(void*);
 		using GetBaseDirFn = std::filesystem::path_view (*)(void*);
+		using GetConfigsDirFn = std::filesystem::path_view (*)(void*);
+		using GetDataDirFn = std::filesystem::path_view (*)(void*);
+		using GetLogsDirFn = std::filesystem::path_view (*)(void*);
 		using GetDependenciesFn = std::vector<std::string_view> (*)(void*);
 		using FindResourceFn = std::optional<std::filesystem::path_view> (*)(void*, std::filesystem::path_view);
 		extern void* handle;
@@ -54,6 +57,9 @@ namespace plg {
 		extern GetAuthorFn GetAuthor;
 		extern GetWebsiteFn GetWebsite;
 		extern GetBaseDirFn GetBaseDir;
+		extern GetConfigsDirFn GetConfigsDir;
+		extern GetDataDirFn GetDataDir;
+		extern GetLogsDirFn GetLogsDir;
 		extern GetDependenciesFn GetDependencies;
 		extern FindResourceFn FindResource;
 	}
@@ -72,6 +78,9 @@ namespace plg {
 		std::string_view GetAuthor() const { return plugin::GetAuthor(plugin::handle); }
 		std::string_view GetWebsite() const { return plugin::GetWebsite(plugin::handle); }
 		std::filesystem::path_view GetBaseDir() const { return plugin::GetBaseDir(plugin::handle); }
+		std::filesystem::path_view GetConfigsDir() const { return plugin::GetConfigsDir(plugin::handle); }
+		std::filesystem::path_view GetDataDir() const { return plugin::GetDataDir(plugin::handle); }
+		std::filesystem::path_view GetLogsDir() const { return plugin::GetLogsDir(plugin::handle); }
 		std::vector<std::string_view> GetDependencies() const { return plugin::GetDependencies(plugin::handle); }
 		std::optional<std::filesystem::path_view> FindResource(std::filesystem::path_view path) const { return plugin::FindResource(plugin::handle, path); }
 
@@ -87,7 +96,6 @@ namespace plg {
     namespace plg { \
         GetMethodPtrFn GetMethodPtr{nullptr}; \
         GetMethodPtr2Fn GetMethodPtr2{nullptr}; \
-        GetBaseDirFn GetBaseDir{nullptr}; \
         IsModuleLoadedFn IsModuleLoaded{nullptr}; \
         IsPluginLoadedFn IsPluginLoaded{nullptr}; \
         namespace plugin { \
@@ -100,6 +108,9 @@ namespace plg {
             GetAuthorFn GetAuthor{nullptr}; \
             GetWebsiteFn GetWebsite{nullptr}; \
             GetBaseDirFn GetBaseDir{nullptr}; \
+            GetConfigsDirFn GetConfigsDir{nullptr}; \
+            GetDataDirFn GetDataDir{nullptr}; \
+            GetLogsDirFn GetLogsDir{nullptr}; \
             GetDependenciesFn GetDependencies{nullptr}; \
             FindResourceFn FindResource{nullptr}; \
         } \
@@ -110,7 +121,6 @@ namespace plg {
             size_t i = 0; \
             GetMethodPtr = reinterpret_cast<GetMethodPtrFn>(api[i++]); \
             GetMethodPtr2 = reinterpret_cast<GetMethodPtr2Fn>(api[i++]); \
-            GetBaseDir = reinterpret_cast<GetBaseDirFn>(api[i++]); \
             IsModuleLoaded = reinterpret_cast<IsModuleLoadedFn>(api[i++]); \
             IsPluginLoaded = reinterpret_cast<IsPluginLoadedFn>(api[i++]); \
             plugin::GetId = reinterpret_cast<plugin::GetIdFn>(api[i++]); \
@@ -121,6 +131,9 @@ namespace plg {
             plugin::GetAuthor = reinterpret_cast<plugin::GetAuthorFn>(api[i++]); \
             plugin::GetWebsite = reinterpret_cast<plugin::GetWebsiteFn>(api[i++]); \
             plugin::GetBaseDir = reinterpret_cast<plugin::GetBaseDirFn>(api[i++]); \
+            plugin::GetConfigsDir = reinterpret_cast<plugin::GetConfigsDirFn>(api[i++]); \
+            plugin::GetDataDir = reinterpret_cast<plugin::GetDataDirFn>(api[i++]); \
+            plugin::GetLogsDir = reinterpret_cast<plugin::GetLogsDirFn>(api[i++]); \
             plugin::GetDependencies = reinterpret_cast<plugin::GetDependenciesFn>(api[i++]); \
             plugin::FindResource = reinterpret_cast<plugin::FindResourceFn>(api[i++]); \
             plugin::handle = handle; \
@@ -134,19 +147,19 @@ namespace plg {
         template<typename T> \
         struct has_overridden_OnPluginStart<T, std::void_t<decltype(std::declval<T>().OnPluginStart())>> \
             : std::bool_constant<!std::is_same_v<decltype(&T::OnPluginStart), \
-                                                 decltype(&plugin_class::OnPluginStart)>> {}; \
+                                                 decltype(&IPluginEntry::OnPluginStart)>> {}; \
         template<typename T, typename = void> \
         struct has_overridden_OnPluginUpdate : std::false_type {}; \
         template<typename T> \
         struct has_overridden_OnPluginUpdate<T, std::void_t<decltype(std::declval<T>().OnPluginUpdate(0.0f))>> \
             : std::bool_constant<!std::is_same_v<decltype(&T::OnPluginUpdate), \
-                                                 decltype(&plugin_class::OnPluginUpdate)>> {}; \
+                                                 decltype(&IPluginEntry::OnPluginUpdate)>> {}; \
         template<typename T, typename = void> \
         struct has_overridden_OnPluginEnd : std::false_type {}; \
         template<typename T> \
         struct has_overridden_OnPluginEnd<T, std::void_t<decltype(std::declval<T>().OnPluginEnd())>> \
             : std::bool_constant<!std::is_same_v<decltype(&T::OnPluginEnd), \
-                                                 decltype(&plugin_class::OnPluginEnd)>> {}; \
+                                                 decltype(&IPluginEntry::OnPluginEnd)>> {}; \
         extern "C" plugin_api void Plugify_PluginStart() { \
             GetPluginEntry()->OnPluginStart(); \
         } \
