@@ -49,7 +49,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/exports)
 file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_FILE_CONTENTS)
 string(STRIP "${VERSION_FILE_CONTENTS}" VERSION_FILE_CONTENTS)
 set(PLUGIN_VERSION "${VERSION_FILE_CONTENTS}" CACHE STRING "Set version name")
-set(PLUGIN_PACKAGE "plugify-plugin-cpp" CACHE STRING "Set package name")
+set(PLUGIN_PACKAGE "${PROJECT_NAME}" CACHE STRING "Set package name")
 string(REPLACE "v" "" PLUGIN_VERSION "${PLUGIN_VERSION}")
 
 
