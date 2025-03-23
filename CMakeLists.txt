@@ -5,7 +5,7 @@ if(POLICY CMP0092)
 endif()
 
 
-project(plugify-plugin-cpp VERSION 1.0.0.0  DESCRIPTION "C++ Example Plugin" HOMEPAGE_URL "https://github.com/untrustedmodders/plugify-module-cpp/test/example_plugin" LANGUAGES CXX)
+project(plugify-plugin-cpp VERSION 1.0.0.0  DESCRIPTION "C++ Example Plugin" HOMEPAGE_URL "https://github.com/untrustedmodders/plugify-plugin-cpp-template" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -45,3 +45,15 @@ endif()
 include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME} EXPORT_MACRO_NAME PLUGIN_API EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/plugin_export.h)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/exports)
+
+file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_FILE_CONTENTS)
+string(STRIP "${VERSION_FILE_CONTENTS}" VERSION_FILE_CONTENTS)
+set(PLUGIN_VERSION "${VERSION_FILE_CONTENTS}" CACHE STRING "Set version name")
+set(PLUGIN_PACKAGE "plugify-plugin-cpp" CACHE STRING "Set package name")
+string(REPLACE "v" "" PLUGIN_VERSION "${PLUGIN_VERSION}")
+
+
+configure_file(
+        ${CMAKE_SOURCE_DIR}/plugify-plugin-cpp.pplugin.in
+        ${CMAKE_BINARY_DIR}/plugify-plugin-cpp.pplugin
+)
