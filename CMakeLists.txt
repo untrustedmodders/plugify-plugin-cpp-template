@@ -46,7 +46,7 @@ include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME} EXPORT_MACRO_NAME PLUGIN_API EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/plugin_export.h)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/exports)
 
-file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_FILE_CONTENTS)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" VERSION_FILE_CONTENTS)
 string(STRIP "${VERSION_FILE_CONTENTS}" VERSION_FILE_CONTENTS)
 set(PLUGIN_VERSION "${VERSION_FILE_CONTENTS}" CACHE STRING "Set version name")
 set(PLUGIN_PACKAGE "${PROJECT_NAME}" CACHE STRING "Set package name")
@@ -54,6 +54,6 @@ string(REPLACE "v" "" PLUGIN_VERSION "${PLUGIN_VERSION}")
 
 
 configure_file(
-        ${CMAKE_SOURCE_DIR}/plugify-plugin-cpp.pplugin.in
-        ${CMAKE_BINARY_DIR}/plugify-plugin-cpp.pplugin
+        ${CMAKE_CURRENT_SOURCE_DIR}/plugify-plugin-cpp.pplugin.in
+        ${CMAKE_CURRENT_BINARY_DIR}/plugify-plugin-cpp.pplugin
 )
