@@ -10,7 +10,7 @@ endif()
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" VERSION_FILE_CONTENTS)
 string(STRIP "${VERSION_FILE_CONTENTS}" VERSION_FILE_CONTENTS)
 set(PLUGIN_VERSION "${VERSION_FILE_CONTENTS}" CACHE STRING "Set version name")
-set(PLUGIN_PACKAGE "plugify-plugin-cpp" CACHE STRING "Set package name")
+set(PLUGIN_PACKAGE "cpp_plugin" CACHE STRING "Set package name")
 string(REPLACE "v" "" PLUGIN_VERSION "${PLUGIN_VERSION}")
 string(REGEX REPLACE "[.+-]" ";" PLUGIN_VERSION_LIST ${PLUGIN_VERSION})
 list(GET PLUGIN_VERSION_LIST 0 PLUGIN_VERSION_MAJOR)
@@ -29,17 +29,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 #
-# Format
-#
-include(CompatFormat)
-
-#
 # Plugin
 #
 set(PLUGIN_SOURCES "plugin.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${PLUGIN_SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/external/plugify/include")
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
@@ -56,7 +51,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
         PLUGIFY_FORMAT_SUPPORT=$<BOOL:${COMPILER_SUPPORTS_FORMAT}>
         PLUGIFY_IS_DEBUG=$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>)
 if(NOT COMPILER_SUPPORTS_FORMAT)
-    target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
+    # only if format is missing
+    #target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
 endif()
 
 include(GenerateExportHeader)

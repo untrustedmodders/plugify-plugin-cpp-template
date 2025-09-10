@@ -1,67 +1,67 @@
 #pragma once
 
-#include <string>
 #include <cstdint>
+#include <string>
 #include <optional>
 #include <filesystem>
 #include <utility>
 #include <vector>
+#include <chrono>
 #include <type_traits>
 
-#include "any.hpp"
-#include "version.hpp"
-
-#include "api/plugify_api.hpp"
-
-namespace std::filesystem {
-#if _WIN32
-	using path_view = std::wstring_view;
-#else
-	using path_view = std::string_view;
-#endif
-} // namespace std::filesystem
+#include "plg/any.hpp"
+#include "plg/version.hpp"
+#include "plg/api.hpp"
 
 namespace plg {
 	using GetMethodPtrFn = void* (*)(std::string_view);
 	using GetMethodPtr2Fn = void (*)(std::string_view, void**);
-	using GetBaseDirFn = std::filesystem::path_view (*)();
-	using IsModuleLoadedFn = bool (*)(std::string_view, std::optional<plg::version>, bool);
-	using IsPluginLoadedFn = bool (*)(std::string_view, std::optional<plg::version>, bool);
+	using GetBaseDirFn = plg::string (*)();
+	using GetExtensionsDirFn = plg::string (*)();
+	using GetConfigsDirFn = plg::string (*)();
+	using GetDataDirFn = plg::string (*)();
+	using GetLogsDirFn = plg::string (*)();
+	using GetCacheDirFn = plg::string (*)();
+	using IsExtensionLoadedFn = bool (*)(std::string_view, std::optional<plg::range_set<>>);
 
 	extern GetMethodPtrFn GetMethodPtr;
 	extern GetMethodPtr2Fn GetMethodPtr2;
 	extern GetBaseDirFn GetBaseDir;
-	extern IsModuleLoadedFn IsModuleLoaded;
-	extern IsPluginLoadedFn IsPluginLoaded;
+	extern GetExtensionsDirFn GetExtensionsDir;
+	extern GetConfigsDirFn GetConfigsDir;
+	extern GetDataDirFn GetDataDir;
+	extern GetLogsDirFn GetLogsDir;
+	extern GetCacheDirFn GetCacheDir;
+	extern IsExtensionLoadedFn IsExtensionLoaded;
+
+	struct Dependency {
+		plg::string name;
+		plg::range_set<> constraints;
+		bool optional;
+	};
+
+	using uuid = std::ptrdiff_t;
 
 	namespace plugin {
-		using GetIdFn = std::ptrdiff_t (*)(void*);
-		using GetNameFn = std::string_view (*)(void*);
-		using GetFullNameFn = std::string_view (*)(void*);
-		using GetDescriptionFn = std::string_view (*)(void*);
-		using GetVersionFn = std::string_view (*)(void*);
-		using GetAuthorFn = std::string_view (*)(void*);
-		using GetWebsiteFn = std::string_view (*)(void*);
-		using GetBaseDirFn = std::filesystem::path_view (*)(void*);
-		using GetConfigsDirFn = std::filesystem::path_view (*)(void*);
-		using GetDataDirFn = std::filesystem::path_view (*)(void*);
-		using GetLogsDirFn = std::filesystem::path_view (*)(void*);
-		using GetDependenciesFn = std::vector<std::string_view> (*)(void*);
-		using FindResourceFn = std::optional<std::filesystem::path_view> (*)(void*, std::filesystem::path_view);
+		using GetIdFn = plg::uuid (*)(void*);
+		using GetNameFn = plg::string (*)(void*);
+		using GetLicenseFn = plg::string (*)(void*);
+		using GetDescriptionFn = plg::string (*)(void*);
+		using GetVersionFn = plg::version<> (*)(void*);
+		using GetAuthorFn = plg::string (*)(void*);
+		using GetWebsiteFn = plg::string (*)(void*);
+		using GetLocationFn = plg::string (*)(void*);
+		using GetDependenciesFn = plg::vector<plg::Dependency> (*)(void*);
 		extern void* handle;
 		extern GetIdFn GetId;
 		extern GetNameFn GetName;
-		extern GetFullNameFn GetFullName;
 		extern GetDescriptionFn GetDescription;
 		extern GetVersionFn GetVersion;
 		extern GetAuthorFn GetAuthor;
 		extern GetWebsiteFn GetWebsite;
-		extern GetBaseDirFn GetBaseDir;
-		extern GetConfigsDirFn GetConfigsDir;
-		extern GetDataDirFn GetDataDir;
-		extern GetLogsDirFn GetLogsDir;
+		extern GetLicenseFn GetLicense;
+		extern GetLocationFn GetLocation;
 		extern GetDependenciesFn GetDependencies;
-		extern FindResourceFn FindResource;
 	}
 
 	class IPluginEntry {
@@ -70,22 +70,18 @@ namespace plg {
 		~IPluginEntry() = default;
 
 	public:
-		std::ptrdiff_t GetId() const { return plugin::GetId(plugin::handle); }
-		std::string_view GetName() const { return plugin::GetName(plugin::handle); }
-		std::string_view GetFullName() const { return plugin::GetFullName(plugin::handle); }
-		std::string_view GetDescription() const { return plugin::GetDescription(plugin::handle); }
-		std::string_view GetVersion() const { return plugin::GetVersion(plugin::handle); }
-		std::string_view GetAuthor() const { return plugin::GetAuthor(plugin::handle); }
-		std::string_view GetWebsite() const { return plugin::GetWebsite(plugin::handle); }
-		std::filesystem::path_view GetBaseDir() const { return plugin::GetBaseDir(plugin::handle); }
-		std::filesystem::path_view GetConfigsDir() const { return plugin::GetConfigsDir(plugin::handle); }
-		std::filesystem::path_view GetDataDir() const { return plugin::GetDataDir(plugin::handle); }
-		std::filesystem::path_view GetLogsDir() const { return plugin::GetLogsDir(plugin::handle); }
-		std::vector<std::string_view> GetDependencies() const { return plugin::GetDependencies(plugin::handle); }
-		std::optional<std::filesystem::path_view> FindResource(std::filesystem::path_view path) const { return plugin::FindResource(plugin::handle, path); }
+		plg::uuid GetId() const { return plugin::GetId(plugin::handle); }
+		plg::string GetName() const { return plugin::GetName(plugin::handle); }
+		plg::string GetDescription() const { return plugin::GetDescription(plugin::handle); }
+		plg::version<> GetVersion() const { return plugin::GetVersion(plugin::handle); }
+		plg::string GetAuthor() const { return plugin::GetAuthor(plugin::handle); }
+		plg::string GetWebsite() const { return plugin::GetWebsite(plugin::handle); }
+		plg::string GetLicense() const { return plugin::GetLicense(plugin::handle); }
+		plg::string GetLocation() const { return plugin::GetLocation(plugin::handle); }
+		plg::vector<plg::Dependency> GetDependencies() const { return plugin::GetDependencies(plugin::handle); }
 
 		virtual void OnPluginStart() {};
-		virtual void OnPluginUpdate(float) {};
+		virtual void OnPluginUpdate(std::chrono::milliseconds) {};
 		virtual void OnPluginEnd() {};
 	};
 
@@ -96,23 +92,24 @@ namespace plg {
     namespace plg { \
         GetMethodPtrFn GetMethodPtr{nullptr}; \
         GetMethodPtr2Fn GetMethodPtr2{nullptr}; \
-        IsModuleLoadedFn IsModuleLoaded{nullptr}; \
-        IsPluginLoadedFn IsPluginLoaded{nullptr}; \
+		GetBaseDirFn GetBaseDir{nullptr}; \
+		GetExtensionsDirFn GetExtensionsDir{nullptr}; \
+		GetConfigsDirFn GetConfigsDir{nullptr}; \
+		GetDataDirFn GetDataDir{nullptr}; \
+		GetLogsDirFn GetLogsDir{nullptr}; \
+		GetCacheDirFn GetCacheDir{nullptr}; \
+        IsExtensionLoadedFn IsExtensionLoaded{nullptr}; \
         namespace plugin { \
             void* handle{nullptr}; \
             GetIdFn GetId{nullptr}; \
             GetNameFn GetName{nullptr}; \
-            GetFullNameFn GetFullName{nullptr}; \
             GetDescriptionFn GetDescription{nullptr}; \
             GetVersionFn GetVersion{nullptr}; \
             GetAuthorFn GetAuthor{nullptr}; \
             GetWebsiteFn GetWebsite{nullptr}; \
-            GetBaseDirFn GetBaseDir{nullptr}; \
-            GetConfigsDirFn GetConfigsDir{nullptr}; \
-            GetDataDirFn GetDataDir{nullptr}; \
-            GetLogsDirFn GetLogsDir{nullptr}; \
+            GetLicenseFn GetLicense{nullptr}; \
+            GetLocationFn GetLocation{nullptr}; \
             GetDependenciesFn GetDependencies{nullptr}; \
-            FindResourceFn FindResource{nullptr}; \
         } \
         extern "C" plugin_api int Plugify_Init(void** api, int version, void* handle) { \
             if (version < kApiVersion) { \
@@ -121,21 +118,22 @@ namespace plg {
             size_t i = 0; \
             GetMethodPtr = static_cast<GetMethodPtrFn>(api[i++]); \
             GetMethodPtr2 = static_cast<GetMethodPtr2Fn>(api[i++]); \
-            IsModuleLoaded = static_cast<IsModuleLoadedFn>(api[i++]); \
-            IsPluginLoaded = static_cast<IsPluginLoadedFn>(api[i++]); \
+            GetBaseDir = static_cast<GetBaseDirFn>(api[i++]); \
+            GetExtensionsDir = static_cast<GetExtensionsDirFn>(api[i++]); \
+            GetConfigsDir = static_cast<GetConfigsDirFn>(api[i++]); \
+            GetDataDir = static_cast<GetDataDirFn>(api[i++]); \
+            GetLogsDir = static_cast<GetLogsDirFn>(api[i++]); \
+            GetCacheDir = static_cast<GetCacheDirFn>(api[i++]); \
+            IsExtensionLoaded = static_cast<IsExtensionLoadedFn>(api[i++]); \
             plugin::GetId = static_cast<plugin::GetIdFn>(api[i++]); \
             plugin::GetName = static_cast<plugin::GetNameFn>(api[i++]); \
-            plugin::GetFullName = static_cast<plugin::GetFullNameFn>(api[i++]); \
             plugin::GetDescription = static_cast<plugin::GetDescriptionFn>(api[i++]); \
             plugin::GetVersion = static_cast<plugin::GetVersionFn>(api[i++]); \
             plugin::GetAuthor = static_cast<plugin::GetAuthorFn>(api[i++]); \
             plugin::GetWebsite = static_cast<plugin::GetWebsiteFn>(api[i++]); \
-            plugin::GetBaseDir = static_cast<plugin::GetBaseDirFn>(api[i++]); \
-            plugin::GetConfigsDir = static_cast<plugin::GetConfigsDirFn>(api[i++]); \
-            plugin::GetDataDir = static_cast<plugin::GetDataDirFn>(api[i++]); \
-            plugin::GetLogsDir = static_cast<plugin::GetLogsDirFn>(api[i++]); \
+            plugin::GetLicense = static_cast<plugin::GetLicenseFn>(api[i++]); \
+            plugin::GetLocation = static_cast<plugin::GetLocationFn>(api[i++]); \
             plugin::GetDependencies = static_cast<plugin::GetDependenciesFn>(api[i++]); \
-            plugin::FindResource = static_cast<plugin::FindResourceFn>(api[i++]); \
             plugin::handle = handle; \
             return 0; \
         } \
@@ -151,7 +149,7 @@ namespace plg {
         template<typename T, typename = void> \
         struct has_overridden_OnPluginUpdate : std::false_type {}; \
         template<typename T> \
-        struct has_overridden_OnPluginUpdate<T, std::void_t<decltype(std::declval<T>().OnPluginUpdate(0.0f))>> \
+        struct has_overridden_OnPluginUpdate<T, std::void_t<decltype(std::declval<T>().OnPluginUpdate(std::chrono::milliseconds{0}))>> \
             : std::bool_constant<!std::is_same_v<decltype(&T::OnPluginUpdate), \
                                                  decltype(&IPluginEntry::OnPluginUpdate)>> {}; \
         template<typename T, typename = void> \
@@ -163,7 +161,7 @@ namespace plg {
         extern "C" plugin_api void Plugify_PluginStart() { \
             GetPluginEntry()->OnPluginStart(); \
         } \
-        extern "C" plugin_api void Plugify_PluginUpdate(float dt) { \
+        extern "C" plugin_api void Plugify_PluginUpdate(std::chrono::milliseconds dt) { \
             GetPluginEntry()->OnPluginUpdate(dt); \
         } \
         extern "C" plugin_api void Plugify_PluginEnd() { \

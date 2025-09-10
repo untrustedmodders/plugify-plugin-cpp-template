@@ -1,21 +1,16 @@
 {
 	"$schema": "https://raw.githubusercontent.com/untrustedmodders/plugify/refs/heads/main/schemas/plugin.schema.json",
-	"fileVersion": 1,
 	"version": "${PLUGIN_VERSION}",
-	"friendlyName": "C++ Sample Plugin",
+	"name": "${PLUGIN_PACKAGE}",
 	"description": "An example of a C++ plugin. This can be used as a starting point when creating your own plugin.",
-	"createdBy": "untrustedmodders",
-	"createdByURL": "https://github.com/untrustedmodders/",
-	"docsURL": "https://github.com/untrustedmodders/plugify-plugin-cpp-template",
-	"downloadURL": "https://github.com/untrustedmodders/plugify-plugin-cpp-template/releases/download/v${PLUGIN_VERSION}/${PLUGIN_PACKAGE}.zip",
-	"updateURL": "https://untrustedmodders.github.io/plugify-plugin-cpp-template/plugify-plugin-cpp.json",
-	"entryPoint": "plugify-plugin-cpp",
-	"supportedPlatforms": [],
-	"languageModule": {
-		"name": "cpp"
-	},
+	"author": "untrustedmodders",
+	"website": "https://github.com/untrustedmodders/",
+	"licence": "MIT",
+	"entry": "plugify-plugin-cpp",
+	"platforms": [],
+	"language": "cpp",
 	"dependencies": [],
-	"exportedMethods": [
+	"methods": [
 		{
 			"name": "MakePrint",
 			"funcName": "MakePrint",
