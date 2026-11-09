@@ -2,3 +2,4 @@ _Plugify_PluginStart
 _Plugify_PluginUpdate
 _Plugify_PluginEnd
 _Plugify_PluginContext
+_MakePrint
